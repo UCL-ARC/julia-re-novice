@@ -60,7 +60,7 @@ Let's create a number of variables to save the data for the plot
   t_stop = 10
   dt = 1e-3
   # Create an array for all the times
-  t = collect(t_start:dt:t_stop)
+  t = t_start:dt:t_stop
   nt = length(t)
   # create x and y
   x = zeros(nt)
