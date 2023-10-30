@@ -116,6 +116,9 @@ position = airplane_motion.(velocity, t)
 
 * Questions
 - How to use the second argument without specifying the first? i.e., change height
+  - Mose: in the method defintion =function airplane_motion(velocity, time, angle=0, height=1.5)= we have four positional-only arguments, the third and forth (=angle= and =height=) being optional.
+    Contrary to other languages (like Python and R(?)), function arguments can be either positional /or/ named keyword, but not both at the same time, so in practice with this single method definition there is no way to set the second optional argument (=height=) at the call-site without also specifying the first one (=angle=).
+    There are ways to achieve this by defining extra methods if =angle= and =height= are annotated to have non-overlapping types, but this is probably a bit too advanced for this level.
 - why =[0:10:100]= doesn't work as =collect= or =range=?
   - Mose: =[0:10:100]= creates a =Vector= whose only element is the object =0:10:100=.
     To create from =0:10:100= a =Vector= with elements =0=, =10=, ..., =1000=, like =collect(0:10:100)= would do, using the =[]= syntax you can "splat" =0:10:100=: =[0:10:100...]= (or use parentheses =[(0:10:100)...]= for good measure, in case you don't remember precedence rules, I never do).
