@@ -1,0 +1,125 @@
+* basics
+
+variables
+types of variables
+math operations; sin, cos, sqrt, ... (what else is available?)
+
+* parabolic movement
+
+#+begin_src julia
+  function airplane_motion(velocity, time, angle)
+      g = 9.8
+      x = velocity * cos(angle) * time
+      y = velocity * sin(angle) * time - 0.5 * g * time^2
+      return (x,y)
+  end
+
+  airplane_motion(0.5, .3, 0)
+#+end_src
+
+most of the time, our starting angle will be 0, also, we need a starting height. Let's set the function with default values
+
+#+begin_src julia
+  function airplane_motion(velocity, time, angle=0, height=1.5)
+      g = 9.8
+      x = velocity * cos(angle) * time
+      y = height + velocity * sin(angle) * time - 0.5 * g * time^2
+      return (x,y)
+  end
+
+  airplane_motion(0.5, .3)
+#+end_src
+
+To consider: Things we can change: velocity, angle. No the time.
+
+The function should no return negative values for y... as if it hits the floor should stop.
+
+#+begin_src julia
+  function airplane_motion(velocity, time, angle=0, height=1.5)
+      g = 9.8
+      vx, vy = velocity * cos(angle), velocity * sin(angle)
+      time_floor = (vy + sqrt(vy^2 + 2*g*height)) / g # Only the positive solution
+      if time >= time_floor
+          time = time_floor
+      end
+      x = vx  * time
+      y = height + vy * time - 0.5 * g * time^2
+      return (x,y)
+  end
+
+  airplane_motion(0.65, 1)
+#+end_src
+
+
+
+Let's create a number of variables to save the data for the plot
+
+#+begin_src julia
+
+  t_start = 0
+  t_stop = 10
+  dt = 1e-3
+  # Create an array for all the times
+  t = collect(t_start:dt:t_stop)
+  nt = length(t)
+  # create x and y
+  x = zeros(nt)
+  y = zeros(nt)
+
+  velocity = 0.6
+  for i in 1:nt
+      x[i], y[i] = airplane_motion(velocity, t[i]);
+  end
+
+#+end_src
+
+
+Lets' make a plot. First we need to install the library for making plots
+#+begin_src julia
+  ]
+  add Plots
+#+end_src
+
+and plotting x, y
+
+#+begin_src julia
+  using Plots
+  plot(x,y)
+#+end_src
+
+let's add some details
+
+#+begin_src
+plot(x, y, title="airplane movement", xlabel="x", ylabel="y", linewidth=3) # label=""
+#+end_src
+
+
+* Then "convert" to julia
+
+
+We can let julia to do the loop without us having to do it:
+#+begin_src julia
+position = airplane_motion.(velocity, t)
+#+end_src
+
+
+
+
+- we've not touched types yet!
+
+- fix values: velocity, height
+- plane: angle
+- Then env: wind velocity, direction
+- paper airplane: wing surface, attack angle,
+
+* Tests?
+
+* Questions
+- How to use the second argument without specifying the first? i.e., change height
+- why =[0:10:100]= doesn't work as =collect= or =range=?
+- How to introduce =.=?
+-
+
+* Sources
+- [[http://www.lactea.ufpr.br/wp-content/uploads/2018/08/On_the_Aerodynamics_of_Paper_Airplanes.pdf][On the aerodynamics of paper airplanes]]
+- [[http://www.stengel.mycpanel.princeton.edu/PaperPlane.html][Paper plane simulator]] (includes matlab code)
