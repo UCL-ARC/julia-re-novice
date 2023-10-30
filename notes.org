@@ -117,7 +117,13 @@ position = airplane_motion.(velocity, t)
 * Questions
 - How to use the second argument without specifying the first? i.e., change height
 - why =[0:10:100]= doesn't work as =collect= or =range=?
+  - Mose: =[0:10:100]= creates a =Vector= whose only element is the object =0:10:100=.
+    To create from =0:10:100= a =Vector= with elements =0=, =10=, ..., =1000=, like =collect(0:10:100)= would do, using the =[]= syntax you can "splat" =0:10:100=: =[0:10:100...]= (or use parentheses =[(0:10:100)...]= for good measure, in case you don't remember precedence rules, I never do).
+    Note: splatting comes with a large-ish performance penalty, so when performance is relevant one may prefer a solution which doesn't involve splatting if possible, like =collect= in this specific case.
+    I'm not sure about the reference to =range=: =range(0; stop=100, step=10)= would create exactly the same object as =0:10:100=, it's just an alternative to the =:= syntax, as it allows to specify a length instead of step or stop (the =:= syntax is always =start:step:stop=, with =step= being optional and defaulting to =1=.
 - How to introduce =.=?
+  - Mose: does the blogpost [[https://julialang.org/blog/2017/01/moredots/][More Dots: Syntactic Loop Fusion in Julia]] help for inspiration? The idea is that if you want to run a function element-wise on a vector/array, you can define the corresponding scalar function that you want to run on each element and then use the =.= to automatically "broadcast" the call to all elements of the input vector/array.
+    Conceptually, the main proposition of the =.= is that it's a syntactic feature: you can write a scalar function and apply it on a vector/array argument at the call-site, instead of having to define a different method for the vector/array case.
 -
 
 * Sources
