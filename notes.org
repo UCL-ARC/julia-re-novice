@@ -90,7 +90,7 @@ and plotting x, y
 let's add some details
 
 #+begin_src
-plot(x, y, title="airplane movement", xlabel="x", ylabel="y", linewidth=3) # label=""
+plot(x, y, title="airplane movement"; xlabel="x", ylabel="y", linewidth=3) # label=""
 #+end_src
 
 
