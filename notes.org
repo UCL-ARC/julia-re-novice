@@ -1,41 +1,276 @@
-* basics
+Collaborative notes
+https://codimd.carpentries.org/BflWKIeDRK2r4wfaqbNgUQ?both
 
-variables
-types of variables
-math operations; sin, cos, sqrt, ... (what else is available?)
+* Introduction
 
-* parabolic movement
+** Why Julia
+
+Julia is a programming language that superficially looks like an interpreted
+language and mostly behaves like one.
+But before each function is executed it will be compiled *just in time*.
+
+Thus you get the flexibility of an interpreted language and the execution speed
+of a compiled language at the cost of waiting a bit longer for the first
+execution of any function.
+
+There is another aspect of Julia that makes it interesting and that is the way
+packages compose.
+
+- Introduce yourself to the person next to you and tell them  why you want to learn Julia?
+  Write the answer on the collaborative document
+
+
+** getting started
+
+Let's create a directory - =LearningJulia= -(on your desktop, or wherever you want). And open that folder with VS Code (File/Open Folder)
+Open a terminal within, and type =julia=.
 
 #+begin_src julia
-  function airplane_motion(velocity, time, angle)
+  1 + 4 * 7.3
+
+  distance = 30.2
+  distance_x_2 = 2 * distance # only shows the second one!
+
+  # Using latex for variables
+  \alpha<tab> = 2
+
+  # some has a value already:
+  \pi<tab>
+#+end_src
+
+*** variables
+#+begin_src julia
+varinfo()
+#+end_src
+
+*** help
+#+begin_src julia
+? \pi
+#+end_src
+
+*** shell prompt
+#+begin_src julia
+; ls -a
+#+end_src
+You can use nano and save a file and write it again.
+
+backspace to get back to julia.
+
+**** exercise
+#+begin_src markdown
+## Hello, `shell>` !
+
+Use the shell mode to create a file called `hello.jl` with the nano terminal text editor.
+Inside that file write the simple hello world program `print("Hello World!")`.
+
+Check the content of the file using `cat hello.jl` and then run the program using `julia hello.jl`.
+Remember, pressing <kbd>;</kbd> enters shell mode.
+#+end_src
+
+*** strings
+#+begin_src julia
+  letter = 'a' # (it's a character, '\pi' works too)
+  greeting = "hello"
+  planet = "Earth"
+  # how do we combine them?
+  greeting * planet
+  # or most likely you'll use
+  join([greeting, planet], " ")
+
+  # If * is to concatenate, how to repeat a string?
+  planet ^ 3
+  repeat(planet, 3)
+
+  # There's many other functions that applies on texts
+  length(planet) # startswith, capitalise, ...
+#+end_src
+
+*** numbers
+
+#+begin_src julia
+  typeof(1.0)
+  1.0 isa Float64 # true
+  supertype(Float64)
+  supertype(AbstractFloat)
+  supertype(Real)
+  supertype(Number)
+  supertype(Any)
+  1.0 isa Number
+#+end_src
+
+![Type_tree-Number](https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Type-hierarchy-for-julia-numbers.png/1200px-Type-hierarchy-for-julia-numbers.png)
+(put it on the codimd)
+
+**** exercise
+#+begin_src markdown
+  :::info
+
+  ## Family tree of numbers
+
+  Find the parent types of π
+
+  :::
+#+end_src
+
+
+
+*** arrays/matrices
+
+#+begin_src julia
+  vector = [1, 2, 3] # column
+  matrix13 = [ 1 2 3 ] # 1 x 3 matrix
+  vector * matrix13 # the column * row
+  matrix13 * vector # the single value
+
+  # what if we have two matrices 3x3
+  matrix_up = [1 2 3; 4 5 6; 7 8 9]
+  matrix_down = [9 8 7; 6 5 4; 3 2 1]
+  matrix_up * matrix_down # matrix multp
+
+  vector * matrix_up # 3x1 x 3x3 won't work
+  matrix_up * vector # but ...
+  # what if we want to multiply each row by the number on the vector?
+  vector .* matrix_up # .* is element by element operation!
+#+end_src
+
+**** Indexing
+#+begin_src julia
+  vector = [4, 5, 1, 3, 8, 0]
+  vector[3]
+  vector[end]
+  vector[end - 3]
+  # range
+  vector[2:4] # inclusive!!
+
+  # in multidemensional arrays
+  cube = [ 1 2 3; 4 5 6;;; 0 9 8; 8 7 36]
+  cube[2, 3, 2] # - R, C, L.
+  size(cube, 1) # tells you the dimensions
+  cube[:, 1:2, 2]
+#+end_src
+
+The data is stored by columns - look at =cube[:]=
+
+** functions
+
+Let's now exit the repl, and open a file in your LearningJulia folder. =paperplane.jl=
+We are going to create a paperplane_motion function.
+
+
+#+begin_src julia
+  function paperplane_motion(velocity, time, angle)
       g = 9.8
       x = velocity * cos(angle) * time
       y = velocity * sin(angle) * time - 0.5 * g * time^2
       return (x,y)
   end
 
-  airplane_motion(0.5, .3, 0)
+  paperplane_motion(0.5, .3, 0)
 #+end_src
 
 most of the time, our starting angle will be 0, also, we need a starting height. Let's set the function with default values
 
 #+begin_src julia
-  function airplane_motion(velocity, time, angle=0, height=1.5)
+  function paperplane_motion(velocity, time, angle=0, height=1.5)
       g = 9.8
       x = velocity * cos(angle) * time
       y = height + velocity * sin(angle) * time - 0.5 * g * time^2
       return (x,y)
   end
 
-  airplane_motion(0.5, .3)
+  paperplane_motion(0.5, .3)
 #+end_src
 
-To consider: Things we can change: velocity, angle. No the time.
+** if statments and booleans
 
 The function should no return negative values for y... as if it hits the floor should stop.
 
 #+begin_src julia
-  function airplane_motion(velocity, time, angle=0, height=1.5)
+  function validate_age(age)
+  if age > 18
+      return("adult")
+  else
+      return("underage")
+  end
+  end
+  validate_age(23)
+
+  # will this work?
+  function validate_age(age)
+  if age > 18
+      return("adult")
+  elseif age > 68
+      return("retired")
+  else
+      return("underage")
+  end
+  end
+  validate_age(75)
+
+
+  function validate_age(age)
+  if age > 68
+      return("retired")
+  elseif age > 18
+      return("adult")
+  else
+      return("underage")
+  end
+  end
+  validate_age(75)
+
+
+
+  function validate_age(age)
+  if age > 68
+      return("retired")
+  elseif age > 18
+      return("adult")
+  elseif age == 5 || age == 12
+      return("help")
+  elseif
+      return("underage")
+  end
+  end
+  validate_age(75)
+
+
+  function validate_age(age)
+  if age > 68
+      return("retired")
+  elseif 25 < age < 55 # we can chain them!
+      return("cheaper driving insurance")
+  elseif age > 18
+      return("adult")
+  elseif age == 5 || age == 12
+      return("help!")
+  else
+      return("underage")
+  end
+  end
+  validate_age(75)
+
+  #+end_src
+
+
+*** exercise
+#+begin_src markdown
+  ::: info
+  ## 🛑 Stop at the floor
+
+  Modify the `paperplane_motion` function to stop give the coordinates on the floor.
+
+  To calculate the time that hits the floor is:
+  $$ t_{floor} = \frac{v_y + \sqrt{v_y^2 + 2gh}}{g}$$
+  :::
+
+
+
+#+end_src
+
+#+begin_src julia
+  # knowing how to do so, then let's add the condition to don't hit the floor.
+  function paperplane_motion(velocity, time, angle=0, height=1.5)
       g = 9.8
       vx, vy = velocity * cos(angle), velocity * sin(angle)
       time_floor = (vy + sqrt(vy^2 + 2*g*height)) / g # Only the positive solution
@@ -47,10 +282,10 @@ The function should no return negative values for y... as if it hits the floor s
       return (x,y)
   end
 
-  airplane_motion(0.65, 1)
+  paperplane_motion(0.65, 1)
 #+end_src
 
-
+** Now we can run for many times to get its trajectory
 
 Let's create a number of variables to save the data for the plot
 
@@ -68,7 +303,7 @@ Let's create a number of variables to save the data for the plot
 
   velocity = 0.6
   for i in 1:nt
-      x[i], y[i] = airplane_motion(velocity, t[i]);
+      x[i], y[i] = paperplane_motion(velocity, t[i]);
   end
 
 #+end_src
@@ -77,6 +312,7 @@ Let's create a number of variables to save the data for the plot
 Lets' make a plot. First we need to install the library for making plots
 #+begin_src julia
   ]
+  activate .
   add Plots
 #+end_src
 
@@ -93,30 +329,353 @@ let's add some details
 plot(x, y, title="airplane movement"; xlabel="x", ylabel="y", linewidth=3) # label=""
 #+end_src
 
+** environments
+
+what's that =activate= thing?
+It's an environment.
+#+begin_src bash
+julia --project=.
+#+end_src
+
+* Lunch! (3h)
 
 * Then "convert" to julia
 
 
 We can let julia to do the loop without us having to do it:
 #+begin_src julia
-position = airplane_motion.(velocity, t)
+  position = paperplane_motion.(velocity, t)
+  plots(position)
 #+end_src
 
+- install Polynomials
+
+Do this on parts: 1) keyword arguments, 2) types, 3) sincos, 4) Polynomial, 5) documentation, (help, or hover over) 6) Doctest.
+
+Let's try if for t=0.1 from a higher height is still in the air.
+#+begin_src julia
+position = paperplane_motion(3, 0.3, height=3) # Boom!
+#+end_src
+
+#+begin_src julia
+    function paperplane_motion(velocity, time; angle=0, height=1.5)
+        ...
+    position = paperplane_motion(3, 0.3, height=3) # it works now!
+#+end_src
+
+We've learnt about the types, but haven't used them!
+#+begin_src julia
+  position = paperplane_motion(3, "0.3") # complains in the time operation (is less)
+  #kill the julia interpreter. So it's not taking the one with Any.
+  function paperplane_motion(velocity::Real, time::Real; angle::Real=0, height::Real=1.5)
+      ...
+  position = paperplane_motion(3, "0.3") # complains in the function. (no method matching)
+#+end_src
+
+Use sincos
+#+begin_src julia
+      vy, vx = velocity .* sincos(angle)
+#+end_src
+
+Use polynomial; Install Polynomials
+#+begin_src julia
+  using Polynomials
+
+      y_of_t = Polynomial([-height, vy, 0.5 * g])
+      time_floor = maximum(roots(y_of_t))
+      ...
+      y = y_of_t(time)
+#+end_src
+
+Add documentation (and even doctest!)
+#+begin_src julia
+  using Polynomials
+
+
+  """
+       paperplane_motion(velocity::Real, time::Real; angle::Real=0, height::Real=1.5)
+
+  Calculates the parabolic motion of a paper plane.
+
+  ## Example
+
+  ```jldoctest
+  julia> paperplane_motion(0.65, 1)
+  (23, 44)
+  ```
+  """
+  function paperplane_motion(velocity::Real, time::Real; angle::Real=0, height::Real=1.5)
+      g = 9.8
+      # vx, vy = velocity * cos(angle), velocity * sin(angle)
+      vy, vx = velocity .* sincos(angle)
+      y_of_t = Polynomial([-height, vy, 0.5 * g])
+      time_floor = maximum(@show roots(y_of_t))
+      if time >= time_floor
+          time = time_floor
+      end
+      x = vx  * time
+      y = y_of_t(time)
+      return (x,y)
+  end
+
+  paperplane_motion(0.65, 1)
+#+end_src
+
+** COMMENT More realistic scenario
+
+Mass, wing area, length, and air properties play a role on how our planes are going to fly.
+
+Tangential to the motion:
+
+$$ m \frac{\partial{v}}{\partial{t}} = - m g \sin \theta - D $$
+
+Normal direction:
+
+$$\frac{\partial\theta}{\partial t} = V/r$$
+
+https://www.phys.uconn.edu/~rozman/Courses/P2200_14F/downloads/glider/glider-2014-11-05.pdf
+
+Let's define a function with the parameters as needed
+
+#+begin_src julia
+  using OrdinaryDiffEq
+  using Plots
+
+  function trajectory!(du,u,p,t)
+      # u = angle, velocity, x, y
+      # others: g, m, Cl, Cd, S, rho
+      g = 9.8
+      m = 0.003
+      CL = 1.2936
+      CD = 0.02
+      S = 0.017
+      rho = 1.225
+      theta, v, _, _ = u
+      q = 0.5 * rho * v^2
+      # velocity
+      du[1] = (CL * q * S - m * g * cos(theta) ) / m
+      du[2] = (-CD * q * S - m * g * sin(theta)) / (m * v)
+      du[3] = v * cos(theta)
+      du[4] = v * sin(theta)
+  end
+
+  u0 = [-0.1794,3.5, 0, 2]
+  tspan = (0.0,100.0)
+
+  prob = ODEProblem(trajectory!,u0,tspan)
+  sol = solve(prob,Tsit5())
+
+  plot(sol,idxs=(3, 4))
+#+end_src
+
+What's the ! mark? It's a name, but that we are warning to our users that it's going to change a parameter in place.
+
+
+We may want to change the properties of the plane... Let's take that out.
+#+begin_src julia
+  struct planeprop
+    CL
+    CD
+    S
+    m
+  end
+
+  # and update the function to
+  function trajectory!(du,u,p,t)
+      # u = angle, velocity, x, y
+      g = 9.8
+      rho = 1.225
+      (;CL, S, CD, m) = p
+      theta, v, _, _ = u
+      q = 0.5 * rho * v^2
+      # angle
+      du[1] = (CL * q * S - m * g * cos(theta) ) / m
+      # velocity
+      du[2] = (-CD * q * S - m * g * sin(theta)) / (m * v)
+      # x
+      du[3] = v * cos(theta)
+      # y
+      du[4] = v * sin(theta)
+  end
+
+  tspan = (0.0,120)
+  CL = 0.2205
+  CD = 0.04
+  S = 0.017
+  m = 0.003
+  p = planeprop(CL, CD, S, m)
+
+  prob = ODEProblem(trajectory!,u0,tspan, p)
+  sol = solve(prob,Tsit5())
+#+end_src
+
+We could do similarly for the earth condition
+#+begin_src julia
+  struct medium
+      rho
+      g
+  end
+
+  earth = medium(1.225, 9.8)
+
+  function trajectory!(du,u,p,t)
+      # u = angle, velocity, x, y
+
+      (;CL, S, CD, m),(;rho, g) = p
+      theta, v, _, _ = u
+      q = 0.5 * rho * v^2
+      # angle
+      du[1] = (CL * q * S - m * g * cos(theta) ) / m
+      # velocity
+      du[2] = (-CD * q * S - m * g * sin(theta)) / (m * v)
+      # x
+      du[3] = v * cos(theta)
+      # y
+      du[4] = v * sin(theta)
+  end
+
+
+  prob = ODEProblem(trajectory!,u0,tspan, (p, e))
+  sol = solve(prob,Tsit5())
+
+
+#+end_src
+
+*** Calculate structures internally                              :skip:
+- structs:
+  #+begin_src julia
+    struct Triangle
+        base
+        height
+        area
+    end
+
+    Triangle(b, h) = Triangle(b, h, b * h / 2)
+
+    function Triangle(b, h)
+        c = ...
+
+        Triangle(b, h, c)
+    end
+
+
+    Triangle(1, 3)
+  #+end_src
+
+** Stop at 0!
+
+#+begin_src julia
+
+  function hit_floor(u, t, integrator)
+      u[4]
+  end
+
+
+  cb = ContinuousCallback(hit_floor, terminate!)
+
+  sol = solve(prob,Tsit5(),callback=cb)
+  plot(sol, idxs=(3, 4))
+
+#+end_src
+
+* Tests
+
+#+begin_src julia
+  include("./paper_plane.jl")
+  using Test
+  @testset "Test arithmetic equalities" begin
+      @test 1 + 1 == 2
+  end
+
+
+  @testset "ages" begin
+      @test validate_age(19) == "adult"
+      @test validate_age(45) == "cheaper driving insurance"
+      @test validate_age(5) == "help!"
+  end
+
+#+end_src
+
+** exercise
+
+#+begin_src markdown
+  :::info
+  Create a test for the paperplane_motion function, using `isapprox`
+
+  :::spoiler Hint
+  `isapprox` doesn't work comparing tuples.
+  :::
+#+end_src
+
+#+begin_src julia
+  @testset "The airplane falls" begin
+      (x, y) = airplane_motion(0.65, 0.003, 0)
+      @test isapprox(x, 0.002, atol=1e-2)
+      @test isapprox(y, 1.49, atol=1e-2)
+  end
+#+end_src
+
+* dataframes
+
+] add DataFrames, CSV
+https://github-pages.arc.ucl.ac.uk/SoDA_workshop/data/penguin_data.csv
+
+using DataFrames, CSV
+penguins = CSV.read("./penguin_data.csv", DataFrame)
+describe(penguins)
+names(penguins)
+propertynames(penguins)
+describe(penguins)[:, [:variable, :mean]] # symbols!
+first(penguins, 5)
+last(penguins, 5)
+penguins[1:5, ["name", "mass (kg)"]]
+p = plot(penguins[: , "culmen depth (mm)"], penguins[:, "culmen length (mm)"], seriestype=:scatter);
+savefig(p, "penguins.png")
+
+# annymous functions
+filter(row -> 4 < row["mass (kg)"] < 5, first(penguins, 5))[:,Cols("name", "mass (kg)")]
+
+filter(["mass (kg)", "culmen depth (mm)"] => (m, c) -> 4 < m < 4.1 || c > 20, penguins)[:,Cols("name", "culmen depth (mm)", "mass (kg)")]
+rename!(penguins, Dict("mass (kg)" => "mass",  "culmen depth (mm)" => "culmen_depth", "culmen length (mm)" => "culmen_length", "flipper length (mm)" => "flipper_length"))
+filter(["mass", "culmen_depth"] => (m, c) -> 4 < m < 4.1 || c > 20, penguins)
+
+* Pluto
+
+] add Pluto
+
+using Pluto
+
+* basics                                                               :skip:
+   - operations on matrices!
+   - size(A, 1); good for loops which we will learn later.
+     for r in 1:size(A,1)
+       @show A[r, :, :]
+       end
+for l in 1:2, c in 1:3, r in 1:2
+       @show A[r, c, l]
+       end
+
+Types: https://docs.julialang.org/en/v1/manual/types/
+
+* ternary operator and types                                           :skip:
+
+
+To consider: Things we can change: velocity, angle. No the time.
+
+
+- Ifs:
+  - ternary operator: 3 > 0 ? "big" : "negative"
+    - b::String = 3 > 0 ? "big" : "negative"; now b can only be strings.
 
 
 
-- we've not touched types yet!
 
-- fix values: velocity, height
-- plane: angle
-- Then env: wind velocity, direction
-- paper airplane: wing surface, attack angle,
 
-* Tests?
+
 
 * Questions
 - How to use the second argument without specifying the first? i.e., change height
-  - Mose: in the method defintion =function airplane_motion(velocity, time, angle=0, height=1.5)= we have four positional-only arguments, the third and forth (=angle= and =height=) being optional.
+  - Mose: in the method defintion =function paperplane_motion(velocity, time, angle=0, height=1.5)= we have four positional-only arguments, the third and forth (=angle= and =height=) being optional.
     Contrary to other languages (like Python and R(?)), function arguments can be either positional /or/ named keyword, but not both at the same time, so in practice with this single method definition there is no way to set the second optional argument (=height=) at the call-site without also specifying the first one (=angle=).
     There are ways to achieve this by defining extra methods if =angle= and =height= are annotated to have non-overlapping types, but this is probably a bit too advanced for this level.
 - why =[0:10:100]= doesn't work as =collect= or =range=?
@@ -127,8 +686,11 @@ position = airplane_motion.(velocity, t)
 - How to introduce =.=?
   - Mose: does the blogpost [[https://julialang.org/blog/2017/01/moredots/][More Dots: Syntactic Loop Fusion in Julia]] help for inspiration? The idea is that if you want to run a function element-wise on a vector/array, you can define the corresponding scalar function that you want to run on each element and then use the =.= to automatically "broadcast" the call to all elements of the input vector/array.
     Conceptually, the main proposition of the =.= is that it's a syntactic feature: you can write a scalar function and apply it on a vector/array argument at the call-site, instead of having to define a different method for the vector/array case.
--
+- ! - is in-place convention.
+- terminate! and callbacks - https://docs.sciml.ai/DiffEqDocs/latest/features/callback_functions/
+
 
 * Sources
-- [[http://www.lactea.ufpr.br/wp-content/uploads/2018/08/On_the_Aerodynamics_of_Paper_Airplanes.pdf][On the aerodynamics of paper airplanes]]
+- [[http://www.lactea.ufpr.br/wp-content/uploads/2018/08/On_the_Aerodynamics_of_Paper_Airplanes.pdf][On the a3erodynamics of paper airplanes]]
 - [[http://www.stengel.mycpanel.princeton.edu/PaperPlane.html][Paper plane simulator]] (includes matlab code)
+https://www.phys.uconn.edu/~rozman/Courses/P2200_14F/downloads/glider/glider-2014-11-05.pdf
