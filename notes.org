@@ -326,7 +326,7 @@ and plotting x, y
 let's add some details
 
 #+begin_src
-plot(x, y, title="airplane movement"; xlabel="x", ylabel="y", linewidth=3) # label=""
+plot(x, y, title="airplane movement", xlabel="x", ylabel="y", linewidth=3) # label=""
 #+end_src
 
 ** environments
@@ -446,20 +446,23 @@ Let's define a function with the parameters as needed
       # others: g, m, Cl, Cd, S, rho
       g = 9.8
       m = 0.003
-      CL = 1.2936
-      CD = 0.02
+      CL = 0.2205
+      CD = 0.04
       S = 0.017
       rho = 1.225
       theta, v, _, _ = u
       q = 0.5 * rho * v^2
+      # angle
+      du[1] = (CL * q * S - m * g * cos(theta) ) / (m * v)
       # velocity
-      du[1] = (CL * q * S - m * g * cos(theta) ) / m
-      du[2] = (-CD * q * S - m * g * sin(theta)) / (m * v)
+      du[2] = (-CD * q * S - m * g * sin(theta)) / m
+      # x
       du[3] = v * cos(theta)
+      # y
       du[4] = v * sin(theta)
   end
 
-  u0 = [-0.1794,3.5, 0, 2]
+  u0 = [-0.1794, 3.5, 0, 2]
   tspan = (0.0,100.0)
 
   prob = ODEProblem(trajectory!,u0,tspan)
@@ -489,9 +492,9 @@ We may want to change the properties of the plane... Let's take that out.
       theta, v, _, _ = u
       q = 0.5 * rho * v^2
       # angle
-      du[1] = (CL * q * S - m * g * cos(theta) ) / m
+      du[1] = (CL * q * S - m * g * cos(theta) ) / (m * v)
       # velocity
-      du[2] = (-CD * q * S - m * g * sin(theta)) / (m * v)
+      du[2] = (-CD * q * S - m * g * sin(theta)) / m
       # x
       du[3] = v * cos(theta)
       # y
@@ -590,7 +593,7 @@ We could do similarly for the earth condition
 
   @testset "ages" begin
       @test validate_age(19) == "adult"
-      @test validate_age(45) == "cheaper driving insurance"
+      @test validate_age(45) == "Cheaper driving insurance"
       @test validate_age(5) == "help!"
   end
 
@@ -609,9 +612,10 @@ We could do similarly for the earth condition
 
 #+begin_src julia
   @testset "The airplane falls" begin
-      (x, y) = airplane_motion(0.65, 0.003, 0)
+      (x, y) = paperplane_motion(0.65, 0.003, 0)
       @test isapprox(x, 0.002, atol=1e-2)
       @test isapprox(y, 1.49, atol=1e-2)
+      @test y ≈ 1.49 atol=1e-2
   end
 #+end_src
 
@@ -620,30 +624,49 @@ We could do similarly for the earth condition
 ] add DataFrames, CSV
 https://github-pages.arc.ucl.ac.uk/SoDA_workshop/data/penguin_data.csv
 
-using DataFrames, CSV
-penguins = CSV.read("./penguin_data.csv", DataFrame)
-describe(penguins)
-names(penguins)
-propertynames(penguins)
-describe(penguins)[:, [:variable, :mean]] # symbols!
-first(penguins, 5)
-last(penguins, 5)
-penguins[1:5, ["name", "mass (kg)"]]
-p = plot(penguins[: , "culmen depth (mm)"], penguins[:, "culmen length (mm)"], seriestype=:scatter);
-savefig(p, "penguins.png")
+#+begin_src julia
+  using DataFrames
+  using CSV
 
-# annymous functions
-filter(row -> 4 < row["mass (kg)"] < 5, first(penguins, 5))[:,Cols("name", "mass (kg)")]
+  penguins = CSV.read("./penguin_data.csv", DataFrame)
+  describe(penguins)
+  names(penguins)
+  propertynames(penguins)
+  describe(penguins)[:, [:variable, :mean]] # symbols!
+  first(penguins, 5)
+  last(penguins, 5)
+  penguins[1:5, ["name", "mass (kg)"]]
 
-filter(["mass (kg)", "culmen depth (mm)"] => (m, c) -> 4 < m < 4.1 || c > 20, penguins)[:,Cols("name", "culmen depth (mm)", "mass (kg)")]
-rename!(penguins, Dict("mass (kg)" => "mass",  "culmen depth (mm)" => "culmen_depth", "culmen length (mm)" => "culmen_length", "flipper length (mm)" => "flipper_length"))
-filter(["mass", "culmen_depth"] => (m, c) -> 4 < m < 4.1 || c > 20, penguins)
+  # exercise - knowing seriestype=:scatter does a scatter plot... (what else I need to add?
+  using Plots
+  p = plot(penguins[: , "culmen depth (mm)"], penguins[:, "culmen length (mm)"], seriestype=:scatter);
+  savefig(p, "penguins.png")
+
+  rename!(penguins, Dict("mass (kg)" => "mass",
+                         "culmen depth (mm)" => "culmen_depth",
+                         "culmen length (mm)" => "culmen_length",
+                         "flipper length (mm)" => "flipper_length"))
+
+  # annymous functions
+  filter(row -> 4 < row["mass (kg)"] < 5, first(penguins, 5))[:,Cols("name", "mass (kg)")]
+
+  filter(["mass", "culmen_depth"] => (m, c) -> 4 < m < 4.1 || c > 20, penguins)
+  # or
+  f(m, c) = 4 < m < 4.1 || c > 20
+  filter(["mass", "culmen_depth"] => f, penguins)
+
+
+
+#+end_src
 
 * Pluto
 
 ] add Pluto
 
 using Pluto
+
+# FIXME: Add the examples of what I want to use.
+
 
 * basics                                                               :skip:
    - operations on matrices!
@@ -673,7 +696,7 @@ To consider: Things we can change: velocity, angle. No the time.
 
 
 
-* Questions
+* Questions                                                            :skip:
 - How to use the second argument without specifying the first? i.e., change height
   - Mose: in the method defintion =function paperplane_motion(velocity, time, angle=0, height=1.5)= we have four positional-only arguments, the third and forth (=angle= and =height=) being optional.
     Contrary to other languages (like Python and R(?)), function arguments can be either positional /or/ named keyword, but not both at the same time, so in practice with this single method definition there is no way to set the second optional argument (=height=) at the call-site without also specifying the first one (=angle=).
